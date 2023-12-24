@@ -1,7 +1,9 @@
-#include <unistd.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 /**
  *
@@ -9,14 +11,20 @@
 
 int main(void)
 {
-  char *argv[] = {"/usr/bin/ls", "-l", "/tmp", NULL};
+  char *argv[] = {NULL, NULL};
   char *envp[] = {NULL};
-  int i, status;
-  pid_t pid;
+  char *buffer = NULL;
+  size_t size = 0;
+  int pid, status;
 
-  for (i = 0; i < 5; i++)
+  while (1)
     {
+      printf("#cisfun$ ");
+      getline(&buffer, &size, stdin);
+      buffer[strlen(buffer) - 1] = '\0';
+
       pid = fork();
+
       if (pid < 0)
 	{
 	  perror("fork gets error!!!\n");
@@ -24,16 +32,25 @@ int main(void)
 	}
       else if (pid == 0)
 	{
-	  printf("The parent PID: %d\n", getppid());
-	  if (execve(argv[0], argv, envp) == -1)
+	  argv[0] = malloc((strlen(buffer) + 1) * sizeof(char));
+	  if (argv[0] == NULL)
+	    return (-1);
+
+	  strcpy(argv[0], buffer);
+	  
+	  if (execve(buffer, argv, envp) == -1)
 	    {
-	      perror("execve gets error!!!");
+	      perror("execve gets error!!!\n");
+	      free(buffer);
+	      free(argv[0]);
 	      return (-1);
 	    }
 	}
       else
-	wait(&status);
+	{
+	  wait(&status);
+	}
     }
 
-  return (-1);
+  return (0);
 }
