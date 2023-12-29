@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <time.h>
 
 /**
  *
@@ -25,6 +26,7 @@ int main(int argc, char **argv)
       if (stat(argv[i], &st) == 0)
 	{
 	  printf("FOUND\n");
+	  printf("%u %u %s\n", st.st_mode, st.st_uid, ctime(&st.st_atime));
 	}
       else
 	{

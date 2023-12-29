@@ -12,8 +12,7 @@
 int main(int argc, char *argv[])
 {
   char *envp0 = NULL;
-  char **ag;
-  char **envp = malloc(2 * sizeof(char *));
+  char *envp[] = {"FILE_=ls", NULL};
   int i, pid;
   char *buffer = NULL;
   FILE *fp = fopen("./path_file", "r");
@@ -23,15 +22,8 @@ int main(int argc, char *argv[])
       perror("fp fails!!!");
       return (-1);
     }
-  envp = malloc(2 * sizeof(char*));
-  if (envp == NULL)
-    {
-      perror("malloc fails!!!");
-      return (-1);
-    }
-  envp[0] = (char *)malloc(20 * sizeof(char));
 
-  strcpy(envp[0], "FILE_=NULL");
+  argv[argc] = NULL;
   
 
   if (argc < 2)
@@ -40,6 +32,7 @@ int main(int argc, char *argv[])
   i = 1;
   while (argv[i])
     {
+      printf("1\n");
       pid = fork();
       if (pid < 0)
 	{
@@ -48,11 +41,7 @@ int main(int argc, char *argv[])
 	}
       else if (pid == 0)
 	{
-	  if (!(setenv("FILE_", argv[i], 1)))
-	    {
-	      perror("setenv fails!!!");
-	      return (-1);
-	    }
+	  printf("c2\n");
 	  if (execve("./_which.sh", argv, envp) == -1)
 	    {
 	      perror("execve fails!!!");
@@ -62,7 +51,7 @@ int main(int argc, char *argv[])
       else
 	{
 	  wait(NULL);
-	  if (!(getline(&buffer, 0, fp)))
+	  if (!(getline(&buffer, NULL, fp)))
 	    {
 	      perror("getline fails!!!");
 	      return (-1);
